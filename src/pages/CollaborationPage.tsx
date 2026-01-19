@@ -1,0 +1,212 @@
+/**
+ * CollaborationPage Component
+ * Allows users to compare their DISC profile with a partner's profile
+ */
+
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useResults } from '../context';
+import { Button, Card } from '../components/common';
+import { ShareResults } from '../components/collaboration/ShareResults';
+import { SynergyMeter } from '../components/collaboration/SynergyMeter';
+import { ComparisonView } from '../components/collaboration/ComparisonView';
+import { CommunicationGuide } from '../components/collaboration/CommunicationGuide';
+
+export default function CollaborationPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { userResults, partnerResults, setPartnerResults, loadFromShareData } = useResults();
+  const [partnerData, setPartnerData] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    // Check for shared data in URL
+    const sharedData = searchParams.get('data');
+    if (sharedData) {
+      const profile = loadFromShareData(sharedData);
+      if (profile) {
+        setPartnerResults(profile);
+      }
+    }
+  }, [searchParams, loadFromShareData, setPartnerResults]);
+
+  useEffect(() => {
+    // Redirect if no user results
+    if (!userResults) {
+      navigate('/assessment');
+    }
+  }, [userResults, navigate]);
+
+  const handleLoadPartner = () => {
+    if (!partnerData.trim()) {
+      setError('공유 링크를 입력해주세요.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // Extract data from URL if full URL is pasted
+      const urlMatch = partnerData.match(/\/shared\/([^/?]+)/);
+      const dataToLoad = urlMatch ? urlMatch[1] : partnerData.trim();
+
+      const profile = loadFromShareData(dataToLoad);
+      if (profile) {
+        setPartnerResults(profile);
+        setPartnerData('');
+      } else {
+        setError('유효하지 않은 공유 링크입니다. 다시 확인해주세요.');
+      }
+    } catch (err) {
+      setError('공유 링크를 불러오는 중 오류가 발생했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleReset = () => {
+    setPartnerData('');
+    setError('');
+  };
+
+  if (!userResults) {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8 md:py-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+            협업 분석
+          </h1>
+          <p className="text-gray-600">
+            동료와의 시너지를 분석하고 더 나은 협업 방법을 찾아보세요
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Input & Share */}
+          <div className="space-y-6">
+            {/* Share My Results */}
+            <ShareResults />
+
+            {/* Load Partner Results */}
+            <Card>
+              <div className="mb-4">
+                <h3 className="text-lg font-bold text-gray-900 mb-1">
+                  동료 결과 불러오기
+                </h3>
+                <p className="text-sm text-gray-600">
+                  동료가 공유한 링크를 입력하세요
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  value={partnerData}
+                  onChange={(e) => setPartnerData(e.target.value)}
+                  placeholder="공유 링크 또는 코드를 붙여넣으세요"
+                  className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={isLoading}
+                />
+
+                {error && (
+                  <div className="p-3 bg-red-50 rounded-lg">
+                    <p className="text-sm text-red-700">{error}</p>
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleLoadPartner}
+                    disabled={isLoading || !partnerData.trim()}
+                    variant="primary"
+                    className="flex-1"
+                  >
+                    {isLoading ? '불러오는 중...' : '불러오기'}
+                  </Button>
+                  {partnerResults && (
+                    <Button
+                      onClick={handleReset}
+                      variant="outline"
+                    >
+                      초기화
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* User Profile Summary */}
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">내 프로필:</span> {userResults.primaryType}
+                  {userResults.secondaryType} ({userResults.profileName})
+                </p>
+              </div>
+            </Card>
+
+            {/* Synergy Score */}
+            {partnerResults && (
+              <SynergyMeter
+                synergyScore={Math.round(
+                  (calculateSynergyScore(userResults, partnerResults))
+                )}
+                compatibilityLevel={getCompatibilityLevel(
+                  calculateSynergyScore(userResults, partnerResults)
+                )}
+              />
+            )}
+          </div>
+
+          {/* Right Column - Comparison & Guide */}
+          <div className="lg:col-span-2">
+            {!partnerResults ? (
+              <Card>
+                <div className="text-center py-12">
+                  <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    동료의 결과를 불러오세요
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    동료가 공유한 링크를 입력하면 시너지 분석을 확인할 수 있습니다.
+                  </p>
+                </div>
+              </Card>
+            ) : (
+              <div className="space-y-6">
+                <ComparisonView userResults={userResults} partnerResults={partnerResults} />
+                <CommunicationGuide userResults={userResults} partnerResults={partnerResults} />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Helper functions (should be in synergy algorithm, but including here for simplicity)
+function calculateSynergyScore(user: any, partner: any): number {
+  const diffs = [
+    Math.abs(user.scores.dominance - partner.scores.dominance),
+    Math.abs(user.scores.influence - partner.scores.influence),
+    Math.abs(user.scores.steadiness - partner.scores.steadiness),
+    Math.abs(user.scores.conscientiousness - partner.scores.conscientiousness),
+  ];
+  const avgDiff = diffs.reduce((a: number, b: number) => a + b, 0) / diffs.length;
+  return 100 - avgDiff;
+}
+
+function getCompatibilityLevel(score: number): string {
+  if (score >= 80) return '훌륭한 조합';
+  if (score >= 65) return '좋은 조합';
+  if (score >= 50) return '보통의 조합';
+  return '도전적인 조합';
+}
