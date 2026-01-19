@@ -51,7 +51,7 @@ export function ProgressBar({
             {label || '진행률'}
           </span>
           <span className="text-sm font-semibold text-gray-900">
-            {clampedProgress}%
+            {Math.round(clampedProgress)}%
           </span>
         </div>
       )}

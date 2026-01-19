@@ -18,7 +18,8 @@ export function ShareResults() {
     return null;
   }
 
-  const shareUrl = generateShareUrl(shareData, window.location.origin);
+  const baseUrl = window.location.origin + import.meta.env.BASE_URL;
+  const shareUrl = generateShareUrl(shareData, baseUrl);
   const shareText = generateShareText(shareData);
 
   const handleCopyLink = async () => {
