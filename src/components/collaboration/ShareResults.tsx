@@ -18,7 +18,7 @@ export function ShareResults() {
     return null;
   }
 
-  const baseUrl = window.location.origin + import.meta.env.BASE_URL;
+  const baseUrl = window.location.origin + import.meta.env.BASE_URL.replace(/\/$/, '');
   const shareUrl = generateShareUrl(shareData, baseUrl);
   const shareText = generateShareText(shareData);
 
