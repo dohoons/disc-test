@@ -10,6 +10,10 @@ import { Button, Spinner } from '../components/common';
 import { DISCRadarChart } from '../components/results/DISCRadarChart';
 import { ProfileDescription } from '../components/results/ProfileDescription';
 import { BehavioralIndicators } from '../components/results/BehavioralIndicators';
+import { ActionPlan } from '../components/results/ActionPlan';
+import { CommunicationStyleGuide } from '../components/results/CommunicationStyleGuide';
+import { DecisionMakingStyle } from '../components/results/DecisionMakingStyle';
+import { StressManagementGuide } from '../components/results/StressManagementGuide';
 
 export default function SharedResultsPage() {
   const { data } = useParams();
@@ -107,6 +111,25 @@ export default function SharedResultsPage() {
           <div>
             <ProfileDescription profile={profile} />
           </div>
+        </div>
+
+        {/* Communication & Decision Making */}
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CommunicationStyleGuide profile={profile} />
+          <DecisionMakingStyle profile={profile} />
+        </div>
+
+        {/* Stress Management */}
+        <div className="mt-6">
+          <StressManagementGuide profile={profile} />
+        </div>
+
+        {/* Action Plan */}
+        <div className="mt-6">
+          <ActionPlan
+            primaryType={profile.primaryType}
+            secondaryType={profile.secondaryType}
+          />
         </div>
 
         {/* Info */}

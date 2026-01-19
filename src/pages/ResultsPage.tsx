@@ -13,6 +13,9 @@ import { BehavioralIndicators } from '../components/results/BehavioralIndicators
 import { ActionPlan } from '../components/results/ActionPlan';
 import { ScoreDisplay } from '../components/results/ScoreDisplay';
 import { ShareResults } from '../components/collaboration/ShareResults';
+import { CommunicationStyleGuide } from '../components/results/CommunicationStyleGuide';
+import { DecisionMakingStyle } from '../components/results/DecisionMakingStyle';
+import { StressManagementGuide } from '../components/results/StressManagementGuide';
 
 export default function ResultsPage() {
   const navigate = useNavigate();
@@ -91,6 +94,17 @@ export default function ResultsPage() {
         </div>
 
         {/* Full Width Sections */}
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <CommunicationStyleGuide profile={userResults} />
+          <DecisionMakingStyle profile={userResults} />
+        </div>
+
+        {/* Stress Management */}
+        <div className="mt-6">
+          <StressManagementGuide profile={userResults} />
+        </div>
+
+        {/* Action Plan */}
         <div className="mt-6">
           <ActionPlan
             primaryType={userResults.primaryType}
