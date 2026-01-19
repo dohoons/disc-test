@@ -3,13 +3,13 @@
  * Displays a single quiz question with answer options
  */
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { discQuestions, Statement } from '../../lib/disc/questions';
 import { useQuiz } from '../../context/QuizContext';
 import { Card } from '../common';
 
 export function QuizQuestion() {
-  const { currentQuestion, responses, answerQuestion, removeQuestionResponse } = useQuiz();
+  const { currentQuestion, responses, answerQuestion, removeQuestionResponse, nextQuestion, canGoNext } = useQuiz();
   const question = discQuestions[currentQuestion];
 
   const [mostLike, setMostLike] = useState<string | null>(
@@ -74,8 +74,18 @@ export function QuizQuestion() {
     return `${baseClass} ${selectedClass}`;
   };
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && mostLike && leastLike && canGoNext) {
+        e.preventDefault();
+        nextQuestion();
+      }
+    },
+    [mostLike, leastLike, canGoNext, nextQuestion]
+  );
+
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto" onKeyDown={handleKeyDown} tabIndex={-1}>
       <Card>
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
