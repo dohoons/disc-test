@@ -12,6 +12,7 @@ import { ProfileDescription } from '../components/results/ProfileDescription';
 import { BehavioralIndicators } from '../components/results/BehavioralIndicators';
 import { ActionPlan } from '../components/results/ActionPlan';
 import { ScoreDisplay } from '../components/results/ScoreDisplay';
+import { ShareResults } from '../components/collaboration/ShareResults';
 
 export default function ResultsPage() {
   const navigate = useNavigate();
@@ -55,6 +56,11 @@ export default function ResultsPage() {
           </p>
         </div>
 
+        {/* Share URL Section */}
+        <div className="mb-8">
+          <ShareResults />
+        </div>
+
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
           <Button onClick={handleRetake} variant="outline">
@@ -90,21 +96,6 @@ export default function ResultsPage() {
             primaryType={userResults.primaryType}
             secondaryType={userResults.secondaryType}
           />
-        </div>
-
-        {/* Share Section */}
-        <div className="mt-6">
-          <div className="bg-blue-50 rounded-lg p-6 text-center">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              결과 공유하기
-            </h3>
-            <p className="text-gray-600 mb-4">
-              URL을 통해 동료와 결과를 공유하고 시너지를 분석하세요
-            </p>
-            <Button onClick={handleCollaborate} size="lg">
-              협업 분석 시작하기
-            </Button>
-          </div>
         </div>
       </div>
     </div>

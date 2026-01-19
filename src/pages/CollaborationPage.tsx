@@ -14,7 +14,7 @@ import { CommunicationGuide } from '../components/collaboration/CommunicationGui
 
 export default function CollaborationPage() {
   const [searchParams] = useSearchParams();
-  const { userResults, partnerResults, setPartnerResults, loadFromShareData, setUserResults } = useResults();
+  const { userResults, partnerResults, setPartnerResults, loadFromShareData, setUserResults, getShareableData } = useResults();
   const [userData, setUserData] = useState('');
   const [partnerData, setPartnerData] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -29,11 +29,21 @@ export default function CollaborationPage() {
         // Set as user's own results
         setUserResults(profile);
         // Also populate the user input field with the share URL
-        const shareUrl = `${window.location.origin}/disc-test/shared/${sharedData}`;
+        const baseUrl = window.location.origin + import.meta.env.BASE_URL;
+        const shareUrl = `${baseUrl}shared/${sharedData}`;
+        setUserData(shareUrl);
+      }
+    } else if (userResults) {
+      // User came directly from ResultsPage with results in memory
+      // Generate and display the share URL for easy copying
+      const shareData = getShareableData();
+      if (shareData) {
+        const baseUrl = window.location.origin + import.meta.env.BASE_URL;
+        const shareUrl = `${baseUrl}shared/${shareData}`;
         setUserData(shareUrl);
       }
     }
-  }, [searchParams, loadFromShareData, setUserResults]);
+  }, [searchParams, loadFromShareData, setUserResults, userResults, getShareableData]);
 
   const handleLoadUser = () => {
     if (!userData.trim()) {
@@ -51,8 +61,8 @@ export default function CollaborationPage() {
 
       const profile = loadFromShareData(dataToLoad);
       if (profile) {
-        // Store as user results (convert to QuizResponses format)
-        setResults(profile.scores as any);
+        // Store as user results
+        setUserResults(profile);
         setUserData('');
       } else {
         setError('유효하지 않은 공유 링크입니다. 다시 확인해주세요.');
@@ -81,7 +91,6 @@ export default function CollaborationPage() {
       const profile = loadFromShareData(dataToLoad);
       if (profile) {
         setPartnerResults(profile);
-        setPartnerData('');
       } else {
         setError('유효하지 않은 공유 링크입니다. 다시 확인해주세요.');
       }

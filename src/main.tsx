@@ -10,13 +10,13 @@ const redirectPath = sessionStorage.getItem('redirect');
 if (redirectPath) {
   sessionStorage.removeItem('redirect');
   // Use absolute URL to ensure the path includes /disc-test/
-  const pathWithoutBase = redirectPath.replace(/^\/disc-test/, '') || '/';
-  window.history.replaceState(null, '', window.location.origin + '/disc-test' + pathWithoutBase);
+  const pathWithoutBase = redirectPath.replace(/^\/disc-test\/?/, '') || '/';
+  window.history.replaceState(null, '', window.location.origin + '/disc-test/' + pathWithoutBase);
 }
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter basename="/disc-test">
+    <BrowserRouter basename="/disc-test/">
       <App />
     </BrowserRouter>
   </StrictMode>,
