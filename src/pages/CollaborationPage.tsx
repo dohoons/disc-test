@@ -14,22 +14,26 @@ import { CommunicationGuide } from '../components/collaboration/CommunicationGui
 
 export default function CollaborationPage() {
   const [searchParams] = useSearchParams();
-  const { userResults, partnerResults, setPartnerResults, loadFromShareData, setResults } = useResults();
+  const { userResults, partnerResults, setPartnerResults, loadFromShareData, setUserResults } = useResults();
   const [userData, setUserData] = useState('');
   const [partnerData, setPartnerData] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Check for shared data in URL
+    // Check for shared data in URL - this is the user's own results
     const sharedData = searchParams.get('data');
     if (sharedData) {
       const profile = loadFromShareData(sharedData);
       if (profile) {
-        setPartnerResults(profile);
+        // Set as user's own results
+        setUserResults(profile);
+        // Also populate the user input field with the share URL
+        const shareUrl = `${window.location.origin}/disc-test/shared/${sharedData}`;
+        setUserData(shareUrl);
       }
     }
-  }, [searchParams, loadFromShareData, setPartnerResults]);
+  }, [searchParams, loadFromShareData, setUserResults]);
 
   const handleLoadUser = () => {
     if (!userData.trim()) {

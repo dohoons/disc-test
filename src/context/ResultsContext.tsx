@@ -13,6 +13,7 @@ interface ResultsContextType {
   userResults: DISCProfile | null;
   partnerResults: DISCProfile | null;
   setResults: (responses: QuizResponses) => void;
+  setUserResults: (results: DISCProfile) => void;
   setPartnerResults: (results: DISCProfile) => void;
   resetResults: () => void;
   getShareableData: () => ShareableResult | null;
@@ -73,6 +74,16 @@ export function ResultsProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const setUserResultsDirect = useCallback((results: DISCProfile) => {
+    setUserResults(results);
+    // Save to localStorage
+    try {
+      localStorage.setItem('disc_results', JSON.stringify(results));
+    } catch (error) {
+      console.error('Failed to save results to localStorage:', error);
+    }
+  }, []);
+
   const resetResults = useCallback(() => {
     setUserResults(null);
     setPartnerResultsState(null);
@@ -120,6 +131,7 @@ export function ResultsProvider({ children }: { children: ReactNode }) {
         userResults,
         partnerResults,
         setResults,
+        setUserResults: setUserResultsDirect,
         setPartnerResults,
         resetResults,
         getShareableData,
