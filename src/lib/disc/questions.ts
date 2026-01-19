@@ -227,7 +227,7 @@ export const discQuestions: Question[] = [
     id: 24,
     statements: [
       { id: '24a', text: '리더가 되어 방향을 제시한다', type: 'D' },
-      { id: '24b', text: '좋아받길 원한다', type: 'I' },
+      { id: '24b', text: '좋아해주길 원한다', type: 'I' },
       { id: '24c', text: '도움이 되길 원한다', type: 'S' },
       { id: '24d', text: '옳길 원한다', type: 'C' },
     ],
