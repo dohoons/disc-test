@@ -9,9 +9,9 @@ import './index.css'
 const redirectPath = sessionStorage.getItem('redirect');
 if (redirectPath) {
   sessionStorage.removeItem('redirect');
-  // Remove the /disc-test/ prefix since BrowserRouter already has basename
+  // Use absolute URL to ensure the path includes /disc-test/
   const pathWithoutBase = redirectPath.replace(/^\/disc-test/, '') || '/';
-  window.history.replaceState(null, '', pathWithoutBase);
+  window.history.replaceState(null, '', window.location.origin + '/disc-test' + pathWithoutBase);
 }
 
 createRoot(document.getElementById('root')!).render(
