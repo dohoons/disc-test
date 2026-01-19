@@ -3,7 +3,7 @@
  * Displays a single quiz question with answer options
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { discQuestions, Statement } from '../../lib/disc/questions';
 import { useQuiz } from '../../context/QuizContext';
 import { Card, Button } from '../common';
@@ -25,6 +25,14 @@ export function QuizQuestion({ onComplete }: QuizQuestionProps) {
   const [leastLike, setLeastLike] = useState<string | null>(
     responses.find((r) => r.questionId === question.id)?.leastLike || null
   );
+
+  // Reset selection when question changes
+  useEffect(() => {
+    const existingResponse = responses.find((r) => r.questionId === question.id);
+    setMostLike(existingResponse?.mostLike || null);
+    setLeastLike(existingResponse?.leastLike || null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [question.id]);
 
   const handleStatementClick = (statementId: string, type: 'most' | 'least') => {
     // Calculate new state values first before updating
