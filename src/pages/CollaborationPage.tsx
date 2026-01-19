@@ -6,8 +6,10 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useResults } from '../context';
+import { compressResult } from '../lib/utils/dataCompression';
 import { Button, Card } from '../components/common';
 import { ShareResults } from '../components/collaboration/ShareResults';
+import { ShareCollaborationResults } from '../components/collaboration/ShareCollaborationResults';
 import { SynergyMeter } from '../components/collaboration/SynergyMeter';
 import { ComparisonView } from '../components/collaboration/ComparisonView';
 import { CommunicationGuide } from '../components/collaboration/CommunicationGuide';
@@ -29,8 +31,8 @@ export default function CollaborationPage() {
         // Set as user's own results
         setUserResults(profile);
         // Also populate the user input field with the share URL
-        const baseUrl = window.location.origin + import.meta.env.BASE_URL;
-        const shareUrl = `${baseUrl}shared/${sharedData}`;
+        const baseUrl = (window.location.origin + import.meta.env.BASE_URL).replace(/\/$/, '');
+        const shareUrl = `${baseUrl}/shared/${sharedData}`;
         setUserData(shareUrl);
       }
     } else if (userResults) {
@@ -38,10 +40,21 @@ export default function CollaborationPage() {
       // Generate and display the share URL for easy copying
       const shareData = getShareableData();
       if (shareData) {
-        const baseUrl = window.location.origin + import.meta.env.BASE_URL;
-        const shareUrl = `${baseUrl}shared/${shareData}`;
+        const baseUrl = (window.location.origin + import.meta.env.BASE_URL).replace(/\/$/, '');
+        const compressedData = compressResult(shareData);
+        const shareUrl = `${baseUrl}/shared/${compressedData}`;
         setUserData(shareUrl);
       }
+    }
+
+    // Load partner URL from localStorage if it exists
+    try {
+      const savedPartnerUrl = localStorage.getItem('disc_partner_url');
+      if (savedPartnerUrl) {
+        setPartnerData(savedPartnerUrl);
+      }
+    } catch (error) {
+      console.error('Failed to load partner URL from localStorage:', error);
     }
   }, [searchParams, loadFromShareData, setUserResults, userResults, getShareableData]);
 
@@ -91,6 +104,12 @@ export default function CollaborationPage() {
       const profile = loadFromShareData(dataToLoad);
       if (profile) {
         setPartnerResults(profile);
+        // Save partner URL to localStorage for persistence
+        try {
+          localStorage.setItem('disc_partner_url', partnerData);
+        } catch (error) {
+          console.error('Failed to save partner URL to localStorage:', error);
+        }
       } else {
         setError('유효하지 않은 공유 링크입니다. 다시 확인해주세요.');
       }
@@ -208,8 +227,11 @@ export default function CollaborationPage() {
               </div>
             )}
 
-            {/* Share My Results (only if user has results) */}
-            {userResults && <ShareResults />}
+            {/* Share My Results (only if user has results but no partner results) */}
+            {userResults && !partnerResults && <ShareResults />}
+
+            {/* Share Collaboration Results (only if both user and partner have results) */}
+            {userResults && partnerResults && <ShareCollaborationResults />}
 
             {/* Synergy Score */}
             {userResults && partnerResults && (
