@@ -4,7 +4,7 @@
  */
 
 import { calculateSynergy } from '../../lib/collaboration/synergyAlgorithm';
-import { getCommunicationTips } from '../../lib/collaboration/communicationTips';
+import { getScoreBasedCommunicationTips } from '../../lib/collaboration/communicationTips';
 import { DISCProfile } from '../../lib/disc/scoring';
 import { Card, CardHeader, CardBody } from '../common';
 
@@ -15,9 +15,9 @@ interface CommunicationGuideProps {
 
 export function CommunicationGuide({ userResults, partnerResults }: CommunicationGuideProps) {
   const synergy = calculateSynergy(userResults, partnerResults);
-  const communicationTips = getCommunicationTips(
-    userResults.primaryType,
-    partnerResults.primaryType
+  const communicationTips = getScoreBasedCommunicationTips(
+    userResults.scores,
+    partnerResults.scores
   );
 
   return (
@@ -79,7 +79,7 @@ export function CommunicationGuide({ userResults, partnerResults }: Communicatio
       {/* Communication Tips */}
       <Card>
         <CardHeader
-          title={`사람 ${userResults.primaryType} → 사람 ${partnerResults.primaryType}`}
+          title={`${userResults.profileName} (${userResults.primaryType}${userResults.secondaryType}) → ${partnerResults.profileName} (${partnerResults.primaryType}${partnerResults.secondaryType})`}
           description={communicationTips.approach}
         />
         <CardBody>

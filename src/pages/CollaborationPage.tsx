@@ -13,6 +13,10 @@ import { ShareCollaborationResults } from '../components/collaboration/ShareColl
 import { SynergyMeter } from '../components/collaboration/SynergyMeter';
 import { ComparisonView } from '../components/collaboration/ComparisonView';
 import { CommunicationGuide } from '../components/collaboration/CommunicationGuide';
+import { IndividualProfileCards } from '../components/collaboration/IndividualProfileCards';
+import { DecisionMakingComparison } from '../components/collaboration/DecisionMakingComparison';
+import { StressTriggers } from '../components/collaboration/StressTriggers';
+import { ConflictResolutionGuide } from '../components/collaboration/ConflictResolutionGuide';
 import { calculateSynergy } from '../lib/collaboration/synergyAlgorithm';
 
 export default function CollaborationPage() {
@@ -318,6 +322,10 @@ export default function CollaborationPage() {
             ) : (
               <div className="space-y-6">
                 <ComparisonView userResults={userResults} partnerResults={partnerResults} />
+                <IndividualProfileCards userResults={userResults} partnerResults={partnerResults} />
+                <DecisionMakingComparison userResults={userResults} partnerResults={partnerResults} />
+                <StressTriggers userResults={userResults} partnerResults={partnerResults} />
+                <ConflictResolutionGuide userResults={userResults} partnerResults={partnerResults} />
                 <CommunicationGuide userResults={userResults} partnerResults={partnerResults} />
               </div>
             )}

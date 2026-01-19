@@ -9,6 +9,10 @@ import { useResults } from '../context';
 import { SynergyMeter } from '../components/collaboration/SynergyMeter';
 import { ComparisonView } from '../components/collaboration/ComparisonView';
 import { CommunicationGuide } from '../components/collaboration/CommunicationGuide';
+import { IndividualProfileCards } from '../components/collaboration/IndividualProfileCards';
+import { DecisionMakingComparison } from '../components/collaboration/DecisionMakingComparison';
+import { StressTriggers } from '../components/collaboration/StressTriggers';
+import { ConflictResolutionGuide } from '../components/collaboration/ConflictResolutionGuide';
 import { ShareCollaborationResults } from '../components/collaboration/ShareCollaborationResults';
 import { Card } from '../components/common';
 import { calculateSynergy } from '../lib/collaboration/synergyAlgorithm';
@@ -118,6 +122,10 @@ export default function SharedCollaborationPage() {
           <div className="lg:col-span-2">
             <div className="space-y-6">
               <ComparisonView userResults={userResults} partnerResults={partnerResults} />
+              <IndividualProfileCards userResults={userResults} partnerResults={partnerResults} />
+              <DecisionMakingComparison userResults={userResults} partnerResults={partnerResults} />
+              <StressTriggers userResults={userResults} partnerResults={partnerResults} />
+              <ConflictResolutionGuide userResults={userResults} partnerResults={partnerResults} />
               <CommunicationGuide userResults={userResults} partnerResults={partnerResults} />
             </div>
           </div>

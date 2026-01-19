@@ -3,7 +3,7 @@
  * Tailored communication guidance for each DISC type
  */
 
-import { DISCType } from '../disc/scoring';
+import { DISCType, DISCScores } from '../disc/scoring';
 
 export interface CommunicationStyle {
   prefers: string[];
@@ -527,4 +527,150 @@ export function getCommunicationTips(
  */
 export function getCommunicationStyle(type: DISCType): CommunicationStyle {
   return communicationStyles[type];
+}
+
+/**
+ * Get communication tips based on full DISC scores (composite type aware)
+ * This provides more accurate tips for composite types like DI, SI, DC, etc.
+ */
+export function getScoreBasedCommunicationTips(
+  fromScores: DISCScores,
+  toScores: DISCScores
+): CommunicationTips {
+  // Calculate communication approach
+  const getApproach = (): string => {
+    const fromSpeed = fromScores.dominance + fromScores.influence;
+    const toSpeed = toScores.dominance + toScores.influence;
+    const fromTask = fromScores.dominance + fromScores.conscientiousness;
+    const toTask = toScores.dominance + toScores.conscientiousness;
+
+    let approach = '';
+
+    // Speed-based approach
+    if (fromSpeed > toSpeed + 20) {
+      approach += '상대방이 충분히 생각할 시간을 주며, ';
+    } else if (toSpeed > fromSpeed + 20) {
+      approach += '핵심을 간결하게 전달하며, ';
+    }
+
+    // Task/People-based approach
+    if (fromTask > toTask + 20) {
+      approach += '결과 중심적으로 ';
+    } else if (toTask > fromTask + 20) {
+      approach += '관계와 감정을 고려하며 ';
+    }
+
+    // Detail level
+    if (toScores.conscientiousness > 55) {
+      approach += '상세한 데이터로 준비해서 ';
+    } else if (toScores.conscientiousness < 45) {
+      approach += '간결하고 핵심적인 정보만 ';
+    }
+
+    return approach || '명확하고 존중하게 ';
+  };
+
+  const getKeyStrategies = (): string[] => {
+    const strategies: string[] = [];
+    const toD = toScores.dominance;
+    const toI = toScores.influence;
+    const toS = toScores.steadiness;
+    const toC = toScores.conscientiousness;
+
+    // High D to receiver
+    if (toD > 55) {
+      strategies.push('결론을 먼저 말하고 필요한 경우에만 설명 추가');
+      strategies.push('결과와 영향에 집중');
+    }
+
+    // High I to receiver
+    if (toI > 55) {
+      strategies.push('친근하고 열정적인 태도로 접근');
+      strategies.push('아이디어를 인정하고 칭찬');
+      strategies.push('대화를 흥미롭게 유지');
+    }
+
+    // High S to receiver
+    if (toS > 55) {
+      strategies.push('변화가 있을 경우 미리 알리고 설명');
+      strategies.push('충분한 처리 시간 제공');
+      strategies.push('인내심과 지원적인 태도');
+    }
+
+    // High C to receiver
+    if (toC > 55) {
+      strategies.push('정확하고 상세한 정보 제공');
+      strategies.push('논리적이고 체계적인 설명');
+      strategies.push('분석할 시간 허용');
+    }
+
+    // Low D to receiver
+    if (toD < 45) {
+      strategies.push('너무 강요하거나 압박하지 않기');
+    }
+
+    // Low I to receiver
+    if (toI < 45) {
+      strategies.push('지나치게 감정적이거나 과장된 표현 자제');
+    }
+
+    // Low S to receiver
+    if (toS < 45) {
+      strategies.push('새로운 접근 방식에 개방적일 수 있음');
+    }
+
+    // Low C to receiver
+    if (toC < 45) {
+      strategies.push('지나치게 디테일에 집중하지 않기');
+    }
+
+    return strategies.length > 0 ? strategies : ['명확하고 직접적으로', '적극적으로 경청'];
+  };
+
+  const getPhraseStarters = (): string[] => {
+    const starters: string[] = [];
+    const toD = toScores.dominance;
+    const toI = toScores.influence;
+    const toS = toScores.steadiness;
+    const toC = toScores.conscientiousness;
+
+    if (toD > 55) {
+      starters.push('핵심은 이렇습니다...', '결과적으로...', '제 추천은...');
+    } else if (toI > 55) {
+      starters.push('흥미로운 아이디어입니다...', '함께 만들어 봅시다...', '잘할 수 있습니다...');
+    } else if (toS > 55) {
+      starters.push('도움이 필요합니다...', '검토해 주셔서 감사합니다...', '이렇게 진행하면 어떨까요...');
+    } else if (toC > 55) {
+      starters.push('데이터가 보여주는 바...', '분석 결과는...', '필요한 정보는...');
+    }
+
+    return starters;
+  };
+
+  const getPhraseAvoiders = (): string[] => {
+    const avoiders: string[] = [];
+    const toD = toScores.dominance;
+    const toI = toScores.influence;
+    const toS = toScores.steadiness;
+    const toC = toScores.conscientiousness;
+
+    if (toD > 55) {
+      avoiders.push('생각해 봐야 할 것 같아요...', '잘 모르겠어요...', '아마도...');
+    } else if (toI > 55) {
+      avoiders.push('재미없는 주제네...', '시간이 없어...', '그냥 해...');
+    } else if (toS > 55) {
+      avoiders.push('지금 당장 해...', '왜 이렇게 느려...', '갑자기 바뀌었어...');
+    } else if (toC > 55) {
+      avoiders.push('그냥 믿어주세요...', '디테일은 중요하지 않아...', '빨리 결정해...');
+    }
+
+    return avoiders;
+  };
+
+  return {
+    approach: getApproach() + '소통하세요.',
+    keyStrategies: getKeyStrategies(),
+    phraseStarters: getPhraseStarters(),
+    phraseAvoiders: getPhraseAvoiders(),
+  };
 }
