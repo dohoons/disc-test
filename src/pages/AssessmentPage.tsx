@@ -62,7 +62,7 @@ export default function AssessmentPage() {
 
         {currentStep === 'question' && (
           <>
-            <QuizQuestion />
+            <QuizQuestion onComplete={handleComplete} />
             <div className="mt-6">
               <QuizNavigation onComplete={handleComplete} />
             </div>

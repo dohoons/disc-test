@@ -8,8 +8,12 @@ import { discQuestions, Statement } from '../../lib/disc/questions';
 import { useQuiz } from '../../context/QuizContext';
 import { Card } from '../common';
 
-export function QuizQuestion() {
-  const { currentQuestion, responses, answerQuestion, removeQuestionResponse, nextQuestion, canGoNext } = useQuiz();
+interface QuizQuestionProps {
+  onComplete?: () => void;
+}
+
+export function QuizQuestion({ onComplete }: QuizQuestionProps) {
+  const { currentQuestion, responses, answerQuestion, removeQuestionResponse, nextQuestion, canGoNext, isComplete } = useQuiz();
   const question = discQuestions[currentQuestion];
 
   const [mostLike, setMostLike] = useState<string | null>(
@@ -76,12 +80,16 @@ export function QuizQuestion() {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && mostLike && leastLike && canGoNext) {
+      if (e.key === 'Enter' && mostLike && leastLike) {
         e.preventDefault();
-        nextQuestion();
+        if (isComplete && onComplete) {
+          onComplete();
+        } else if (canGoNext) {
+          nextQuestion();
+        }
       }
     },
-    [mostLike, leastLike, canGoNext, nextQuestion]
+    [mostLike, leastLike, canGoNext, isComplete, onComplete, nextQuestion]
   );
 
   return (
