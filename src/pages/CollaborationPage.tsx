@@ -16,7 +16,7 @@ import { CommunicationGuide } from '../components/collaboration/CommunicationGui
 
 export default function CollaborationPage() {
   const [searchParams] = useSearchParams();
-  const { userResults, partnerResults, setPartnerResults, loadFromShareData, setUserResults, getShareableData } = useResults();
+  const { userResults, partnerResults, setPartnerResults, loadFromShareData, setUserResults, getShareableData, resetUserResults, resetPartnerResults } = useResults();
   const [userData, setUserData] = useState('');
   const [partnerData, setPartnerData] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -142,6 +142,20 @@ export default function CollaborationPage() {
     }
   };
 
+  const handleResetUser = () => {
+    if (confirm('내 검사 결과를 초기화하시겠습니까?')) {
+      resetUserResults();
+      setUserData('');
+    }
+  };
+
+  const handleResetPartner = () => {
+    if (confirm('동료 결과 불러오기 내역을 초기화하시겠습니까?')) {
+      resetPartnerResults();
+      setPartnerData('');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 md:py-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -190,11 +204,17 @@ export default function CollaborationPage() {
 
                 {/* User Profile Summary */}
                 {userResults && (
-                  <div className="p-3 bg-blue-50 rounded-lg">
+                  <div className="p-3 bg-blue-50 rounded-lg space-y-2">
                     <p className="text-sm text-gray-700">
                       <span className="font-semibold">내 프로필:</span> {userResults.primaryType}
                       {userResults.secondaryType} ({userResults.profileName})
                     </p>
+                    <button
+                      onClick={handleResetUser}
+                      className="w-full px-3 py-1.5 text-xs text-gray-600 border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+                    >
+                      초기화
+                    </button>
                   </div>
                 )}
               </div>
@@ -232,11 +252,17 @@ export default function CollaborationPage() {
 
                 {/* Partner Profile Summary */}
                 {partnerResults && (
-                  <div className="p-3 bg-green-50 rounded-lg">
+                  <div className="p-3 bg-green-50 rounded-lg space-y-2">
                     <p className="text-sm text-gray-700">
                       <span className="font-semibold">동료 프로필:</span> {partnerResults.primaryType}
                       {partnerResults.secondaryType} ({partnerResults.profileName})
                     </p>
+                    <button
+                      onClick={handleResetPartner}
+                      className="w-full px-3 py-1.5 text-xs text-gray-600 border border-gray-300 rounded hover:bg-gray-100 transition-colors"
+                    >
+                      초기화
+                    </button>
                   </div>
                 )}
               </div>

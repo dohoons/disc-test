@@ -16,6 +16,8 @@ interface ResultsContextType {
   setUserResults: (results: DISCProfile) => void;
   setPartnerResults: (results: DISCProfile) => void;
   resetResults: () => void;
+  resetUserResults: () => void;
+  resetPartnerResults: () => void;
   getShareableData: () => ShareableResult | null;
   getCollaborationShareableData: () => ShareableCollaboration | null;
   loadFromShareData: (data: string) => DISCProfile | null;
@@ -94,6 +96,25 @@ export function ResultsProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem('disc_partner_results');
     } catch (error) {
       console.error('Failed to clear results from localStorage:', error);
+    }
+  }, []);
+
+  const resetUserResults = useCallback(() => {
+    setUserResults(null);
+    try {
+      localStorage.removeItem('disc_results');
+    } catch (error) {
+      console.error('Failed to clear user results from localStorage:', error);
+    }
+  }, []);
+
+  const resetPartnerResults = useCallback(() => {
+    setPartnerResultsState(null);
+    try {
+      localStorage.removeItem('disc_partner_results');
+      localStorage.removeItem('disc_partner_url');
+    } catch (error) {
+      console.error('Failed to clear partner results from localStorage:', error);
     }
   }, []);
 
@@ -183,6 +204,8 @@ export function ResultsProvider({ children }: { children: ReactNode }) {
         setUserResults: setUserResultsDirect,
         setPartnerResults,
         resetResults,
+        resetUserResults,
+        resetPartnerResults,
         getShareableData,
         getCollaborationShareableData,
         loadFromShareData,
