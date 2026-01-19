@@ -11,6 +11,7 @@ import { ComparisonView } from '../components/collaboration/ComparisonView';
 import { CommunicationGuide } from '../components/collaboration/CommunicationGuide';
 import { ShareCollaborationResults } from '../components/collaboration/ShareCollaborationResults';
 import { Card } from '../components/common';
+import { calculateSynergy } from '../lib/collaboration/synergyAlgorithm';
 
 export default function SharedCollaborationPage() {
   const { data } = useParams<{ data: string }>();
@@ -105,12 +106,8 @@ export default function SharedCollaborationPage() {
 
             {/* Synergy Score */}
             <SynergyMeter
-              synergyScore={Math.round(
-                (calculateSynergyScore(userResults, partnerResults))
-              )}
-              compatibilityLevel={getCompatibilityLevel(
-                calculateSynergyScore(userResults, partnerResults)
-              )}
+              synergyScore={calculateSynergy(userResults, partnerResults).synergyScore}
+              compatibilityLevel={calculateSynergy(userResults, partnerResults).compatibilityLevel}
             />
 
             {/* Share */}
@@ -128,23 +125,4 @@ export default function SharedCollaborationPage() {
       </div>
     </div>
   );
-}
-
-// Helper functions (copied from CollaborationPage - could be moved to a utils file)
-function calculateSynergyScore(user: any, partner: any): number {
-  const diffs = [
-    Math.abs(user.scores.dominance - partner.scores.dominance),
-    Math.abs(user.scores.influence - partner.scores.influence),
-    Math.abs(user.scores.steadiness - partner.scores.steadiness),
-    Math.abs(user.scores.conscientiousness - partner.scores.conscientiousness),
-  ];
-  const avgDiff = diffs.reduce((a: number, b: number) => a + b, 0) / diffs.length;
-  return 100 - avgDiff;
-}
-
-function getCompatibilityLevel(score: number): string {
-  if (score >= 80) return '훌륭한 조합';
-  if (score >= 65) return '좋은 조합';
-  if (score >= 50) return '보통의 조합';
-  return '도전적인 조합';
 }
