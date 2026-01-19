@@ -7,7 +7,7 @@ import { createContext, useContext, useState, useCallback, useEffect, ReactNode 
 import { DISCProfile, calculateDISCScores, determineDISCProfile } from '../lib/disc/scoring';
 import { QuizResponses } from '../lib/disc/questions';
 import { getProfileDescription } from '../lib/disc/profiles';
-import { ShareableResult, decompressResult } from '../lib/utils/dataCompression';
+import { ShareableResult, ShareableCollaboration, decompressResult, decompressCollaboration } from '../lib/utils/dataCompression';
 
 interface ResultsContextType {
   userResults: DISCProfile | null;
@@ -17,7 +17,9 @@ interface ResultsContextType {
   setPartnerResults: (results: DISCProfile) => void;
   resetResults: () => void;
   getShareableData: () => ShareableResult | null;
+  getCollaborationShareableData: () => ShareableCollaboration | null;
   loadFromShareData: (data: string) => DISCProfile | null;
+  loadFromCollaborationShareData: (data: string) => { userResults: DISCProfile; partnerResults: DISCProfile } | null;
 }
 
 const ResultsContext = createContext<ResultsContextType | undefined>(undefined);
@@ -125,6 +127,53 @@ export function ResultsProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const getCollaborationShareableData = useCallback((): ShareableCollaboration | null => {
+    if (!userResults || !partnerResults) return null;
+
+    return {
+      userResults: {
+        scores: userResults.scores,
+        primaryType: userResults.primaryType,
+        secondaryType: userResults.secondaryType,
+        profileName: userResults.profileName,
+      },
+      partnerResults: {
+        scores: partnerResults.scores,
+        primaryType: partnerResults.primaryType,
+        secondaryType: partnerResults.secondaryType,
+        profileName: partnerResults.profileName,
+      },
+      timestamp: Date.now(),
+    };
+  }, [userResults, partnerResults]);
+
+  const loadFromCollaborationShareData = useCallback((data: string): { userResults: DISCProfile; partnerResults: DISCProfile } | null => {
+    try {
+      const collaboration = decompressCollaboration(data);
+      if (!collaboration) return null;
+
+      const userProfile = determineDISCProfile(collaboration.userResults.scores);
+      const userDescription = getProfileDescription(userProfile.primaryType, userProfile.secondaryType);
+
+      const partnerProfile = determineDISCProfile(collaboration.partnerResults.scores);
+      const partnerDescription = getProfileDescription(partnerProfile.primaryType, partnerProfile.secondaryType);
+
+      return {
+        userResults: {
+          ...userProfile,
+          profileName: userDescription.name,
+        },
+        partnerResults: {
+          ...partnerProfile,
+          profileName: partnerDescription.name,
+        },
+      };
+    } catch (error) {
+      console.error('Failed to load collaboration data:', error);
+      return null;
+    }
+  }, []);
+
   return (
     <ResultsContext.Provider
       value={{
@@ -135,7 +184,9 @@ export function ResultsProvider({ children }: { children: ReactNode }) {
         setPartnerResults,
         resetResults,
         getShareableData,
+        getCollaborationShareableData,
         loadFromShareData,
+        loadFromCollaborationShareData,
       }}
     >
       {children}
