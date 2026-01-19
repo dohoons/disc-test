@@ -5,16 +5,11 @@
   <title>DISC Test</title>
   <script type="text/javascript">
     // Single Page App workaround for GitHub Pages
-    // Redirect all 404s to index.html
-    const path = window.location.pathname.replace(/\/disc-test\/?/, '');
-    const segment = path.split('/').filter(Boolean);
-
-    // Preserve query parameters and hash
-    const search = window.location.search;
-    const hash = window.location.hash;
-
-    // Redirect to index.html with original path
-    window.location.replace('/disc-test/' + search + hash);
+    // Store the current path and redirect to index.html
+    // The app will restore the original path from sessionStorage
+    const path = window.location.pathname + window.location.search + window.location.hash;
+    sessionStorage.setItem('redirect', path);
+    window.location.replace('/disc-test/');
   </script>
 </head>
 <body>

@@ -3,7 +3,7 @@
  * Manages DISC assessment results and collaboration data
  */
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { DISCProfile, calculateDISCScores, determineDISCProfile } from '../lib/disc/scoring';
 import { QuizResponses } from '../lib/disc/questions';
 import { getProfileDescription } from '../lib/disc/profiles';
@@ -24,6 +24,23 @@ const ResultsContext = createContext<ResultsContextType | undefined>(undefined);
 export function ResultsProvider({ children }: { children: ReactNode }) {
   const [userResults, setUserResults] = useState<DISCProfile | null>(null);
   const [partnerResults, setPartnerResultsState] = useState<DISCProfile | null>(null);
+
+  // Load results from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('disc_results');
+      if (saved) {
+        setUserResults(JSON.parse(saved));
+      }
+
+      const savedPartner = localStorage.getItem('disc_partner_results');
+      if (savedPartner) {
+        setPartnerResultsState(JSON.parse(savedPartner));
+      }
+    } catch (error) {
+      console.error('Failed to load results from localStorage:', error);
+    }
+  }, []);
 
   const setResults = useCallback((responses: QuizResponses) => {
     const scores = calculateDISCScores(responses);
@@ -48,6 +65,12 @@ export function ResultsProvider({ children }: { children: ReactNode }) {
 
   const setPartnerResults = useCallback((results: DISCProfile) => {
     setPartnerResultsState(results);
+    // Save to localStorage
+    try {
+      localStorage.setItem('disc_partner_results', JSON.stringify(results));
+    } catch (error) {
+      console.error('Failed to save partner results to localStorage:', error);
+    }
   }, []);
 
   const resetResults = useCallback(() => {
@@ -55,6 +78,7 @@ export function ResultsProvider({ children }: { children: ReactNode }) {
     setPartnerResultsState(null);
     try {
       localStorage.removeItem('disc_results');
+      localStorage.removeItem('disc_partner_results');
     } catch (error) {
       console.error('Failed to clear results from localStorage:', error);
     }

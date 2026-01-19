@@ -12,6 +12,7 @@ interface QuizContextType {
   isComplete: boolean;
   totalQuestions: number;
   answerQuestion: (questionId: number, mostLike: string, leastLike: string) => void;
+  removeQuestionResponse: (questionId: number) => void;
   nextQuestion: () => void;
   previousQuestion: () => void;
   goToQuestion: (questionId: number) => void;
@@ -51,6 +52,10 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const removeQuestionResponse = useCallback((questionId: number) => {
+    setResponses((prev) => prev.filter((r) => r.questionId !== questionId));
+  }, []);
+
   const nextQuestion = useCallback(() => {
     if (currentQuestion < totalQuestions - 1) {
       setCurrentQuestion((prev) => prev + 1);
@@ -86,6 +91,7 @@ export function QuizProvider({ children }: { children: ReactNode }) {
         isComplete,
         totalQuestions,
         answerQuestion,
+        removeQuestionResponse,
         nextQuestion,
         previousQuestion,
         goToQuestion,

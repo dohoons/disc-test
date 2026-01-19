@@ -9,7 +9,7 @@ import { useQuiz } from '../../context/QuizContext';
 import { Card } from '../common';
 
 export function QuizQuestion() {
-  const { currentQuestion, responses, answerQuestion } = useQuiz();
+  const { currentQuestion, responses, answerQuestion, removeQuestionResponse } = useQuiz();
   const question = discQuestions[currentQuestion];
 
   const [mostLike, setMostLike] = useState<string | null>(
@@ -20,48 +20,44 @@ export function QuizQuestion() {
   );
 
   const handleStatementClick = (statementId: string, type: 'most' | 'least') => {
+    // Calculate new state values first before updating
+    let newMostLike: string | null = mostLike;
+    let newLeastLike: string | null = leastLike;
+
     if (type === 'most') {
       // If clicking the same statement that's already selected as most, deselect it
       if (mostLike === statementId) {
-        setMostLike(null);
+        newMostLike = null;
       } else {
-        setMostLike(statementId);
+        newMostLike = statementId;
         // If this was previously selected as least, remove it from least
         if (leastLike === statementId) {
-          setLeastLike(null);
+          newLeastLike = null;
         }
       }
     } else {
       // If clicking the same statement that's already selected as least, deselect it
       if (leastLike === statementId) {
-        setLeastLike(null);
+        newLeastLike = null;
       } else {
-        setLeastLike(statementId);
+        newLeastLike = statementId;
         // If this was previously selected as most, remove it from most
         if (mostLike === statementId) {
-          setMostLike(null);
+          newMostLike = null;
         }
       }
     }
 
-    // Save the response
-    const newMostLike = mostLike === statementId && type === 'most' ? null : mostLike;
-    const newLeastLike = leastLike === statementId && type === 'least' ? null : leastLike;
+    // Update state
+    setMostLike(newMostLike);
+    setLeastLike(newLeastLike);
 
-    if (type === 'most') {
-      if (newMostLike !== null && newLeastLike !== null) {
-        answerQuestion(question.id, newMostLike === statementId ? statementId : newMostLike!, newLeastLike);
-      } else if (newMostLike !== null && leastLike !== null) {
-        answerQuestion(question.id, newMostLike === statementId ? statementId : newMostLike!, leastLike);
-      } else if (newMostLike !== null && leastLike === statementId && newLeastLike !== null) {
-        answerQuestion(question.id, newMostLike!, newLeastLike);
-      }
+    // Save the response only if both are selected
+    if (newMostLike !== null && newLeastLike !== null) {
+      answerQuestion(question.id, newMostLike, newLeastLike);
     } else {
-      if (mostLike !== null && newLeastLike !== null) {
-        answerQuestion(question.id, mostLike, newLeastLike);
-      } else if (newLeastLike !== null && mostLike === statementId && newMostLike !== null) {
-        answerQuestion(question.id, newMostLike, newLeastLike);
-      }
+      // Remove the response if either selection is cleared
+      removeQuestionResponse(question.id);
     }
   };
 

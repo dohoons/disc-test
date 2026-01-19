@@ -14,7 +14,7 @@ import { BehavioralIndicators } from '../components/results/BehavioralIndicators
 export default function SharedResultsPage() {
   const { data } = useParams();
   const navigate = useNavigate();
-  const { loadFromShareData } = useResults();
+  const { loadFromShareData, setPartnerResults } = useResults();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -37,6 +37,8 @@ export default function SharedResultsPage() {
   }, [data, loadFromShareData]);
 
   const handleCollaborate = () => {
+    // Set shared profile as partner results
+    setPartnerResults(profile);
     navigate('/collaborate');
   };
 
