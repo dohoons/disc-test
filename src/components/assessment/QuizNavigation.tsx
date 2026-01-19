@@ -4,7 +4,7 @@
  */
 
 import { useQuiz } from '../../context/QuizContext';
-import { Button, ProgressBar } from '../common';
+import { ProgressBar } from '../common';
 
 interface QuizNavigationProps {
   onComplete?: () => void;
@@ -15,30 +15,8 @@ export function QuizNavigation({ onComplete }: QuizNavigationProps) {
     currentQuestion,
     totalQuestions,
     responses,
-    canGoPrevious,
-    canGoNext,
-    nextQuestion,
-    previousQuestion,
     goToQuestion,
-    isComplete,
   } = useQuiz();
-
-  // Check if current question is answered
-  const isCurrentAnswered = responses.some((r) => r.questionId === currentQuestion + 1);
-
-  const handleNext = () => {
-    if (canGoNext) {
-      nextQuestion();
-    } else if (isComplete && onComplete) {
-      onComplete();
-    }
-  };
-
-  const handleComplete = () => {
-    if (onComplete) {
-      onComplete();
-    }
-  };
 
   // Generate question numbers for navigation
   const questionNumbers = Array.from({ length: totalQuestions }, (_, i) => i + 1);
@@ -75,37 +53,6 @@ export function QuizNavigation({ onComplete }: QuizNavigationProps) {
               </button>
             );
           })}
-        </div>
-      </div>
-
-      {/* Navigation Buttons */}
-      <div className="flex items-center justify-between">
-        <Button
-          variant="outline"
-          onClick={previousQuestion}
-          disabled={!canGoPrevious}
-        >
-          ← 이전
-        </Button>
-
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-600">
-            {responses.length} / {totalQuestions} 완료
-          </span>
-
-          {isComplete ? (
-            <Button variant="primary" onClick={handleComplete} size="lg">
-              결과 보기
-            </Button>
-          ) : (
-            <Button
-              variant="primary"
-              onClick={handleNext}
-              disabled={!canGoNext || !isCurrentAnswered}
-            >
-              다음 →
-            </Button>
-          )}
         </div>
       </div>
     </div>

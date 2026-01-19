@@ -16,8 +16,9 @@ export default function HomePage() {
             DISC 성격 유형 검사
           </h1>
           <p className="text-xl sm:text-2xl text-gray-600 mb-8">
-            자신의 행동 스타일을 이해하고<br className="sm:hidden" />
-            팀 협업을 개선하세요
+            자신의 행동 스타일을 이해하고
+            <br className="sm:hidden" />
+            {' '}팀 협업을 개선하세요
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link to="/assessment">

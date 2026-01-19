@@ -6,15 +6,18 @@
 import { useState, useCallback } from 'react';
 import { discQuestions, Statement } from '../../lib/disc/questions';
 import { useQuiz } from '../../context/QuizContext';
-import { Card } from '../common';
+import { Card, Button } from '../common';
 
 interface QuizQuestionProps {
   onComplete?: () => void;
 }
 
 export function QuizQuestion({ onComplete }: QuizQuestionProps) {
-  const { currentQuestion, responses, answerQuestion, removeQuestionResponse, nextQuestion, canGoNext, isComplete } = useQuiz();
+  const { currentQuestion, responses, answerQuestion, removeQuestionResponse, nextQuestion, canGoNext, isComplete, canGoPrevious, previousQuestion, totalQuestions } = useQuiz();
   const question = discQuestions[currentQuestion];
+
+  // Check if current question is answered
+  const isCurrentAnswered = responses.some((r) => r.questionId === question.id);
 
   const [mostLike, setMostLike] = useState<string | null>(
     responses.find((r) => r.questionId === question.id)?.mostLike || null
@@ -94,7 +97,7 @@ export function QuizQuestion({ onComplete }: QuizQuestionProps) {
 
   return (
     <div className="max-w-3xl mx-auto" onKeyDown={handleKeyDown} tabIndex={-1}>
-      <Card>
+      <Card className="px-5 md:px-6">
         <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm font-medium text-gray-500">
@@ -106,7 +109,7 @@ export function QuizQuestion({ onComplete }: QuizQuestionProps) {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-2 gap-2 md:gap-8">
           {/* Most Like Column */}
           <div>
             <h3 className="text-lg font-semibold text-green-700 mb-4 flex items-center">
@@ -155,7 +158,7 @@ export function QuizQuestion({ onComplete }: QuizQuestionProps) {
         </div>
 
         {/* Selection Status */}
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+        <div className="mt-6 py-4 px-2 bg-gray-50 rounded-lg">
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-600">
               {mostLike ? (
@@ -171,6 +174,41 @@ export function QuizQuestion({ onComplete }: QuizQuestionProps) {
                 <span>가장 다른 것을 선택해주세요</span>
               )}
             </span>
+          </div>
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="sticky bottom-0 flex items-center justify-between py-4 -mx-5 px-5 bg-white border-t border-gray-200 md:static md:border-0 md:py-0 md:-mx-6 md:px-6 mt-6">
+          <Button
+            variant="outline"
+            onClick={previousQuestion}
+            disabled={!canGoPrevious}
+            size="sm"
+          >
+            ← 이전
+          </Button>
+
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-600">
+              {responses.length} / {totalQuestions}
+            </span>
+
+            {isComplete ? (
+              <Button variant="primary" onClick={onComplete} size="sm">
+                결과 보기
+              </Button>
+            ) : (
+              <Button
+                variant="primary"
+                onClick={() => {
+                  if (canGoNext) nextQuestion();
+                }}
+                disabled={!canGoNext || !isCurrentAnswered}
+                size="sm"
+              >
+                다음 →
+              </Button>
+            )}
           </div>
         </div>
       </Card>
