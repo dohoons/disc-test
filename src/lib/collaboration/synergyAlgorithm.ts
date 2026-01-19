@@ -15,8 +15,93 @@ export interface SynergyResult {
 }
 
 /**
+ * Get the primary DISC type for a profile based on highest score
+ */
+function getPrimaryType(scores: DISCScores): 'D' | 'I' | 'S' | 'C' {
+  const dims = [
+    { type: 'D' as const, score: scores.dominance },
+    { type: 'I' as const, score: scores.influence },
+    { type: 'S' as const, score: scores.steadiness },
+    { type: 'C' as const, score: scores.conscientiousness },
+  ];
+  dims.sort((a, b) => b.score - a.score);
+  return dims[0].type;
+}
+
+/**
+ * Calculate base compatibility between two DISC types (0-100)
+ *
+ * Based on standard DISC theory:
+ * - D + C: High (task-oriented complementary)
+ * - I + S: High (people-oriented complementary)
+ * - D + I: Medium-High (both fast, extraverted)
+ * - S + C: Medium-High (both cautious, introverted)
+ * - D + S: Low (speed vs patience - opposing)
+ * - I + C: Low (emotion vs logic - opposing)
+ */
+function calculateTypeCompatibility(type1: 'D' | 'I' | 'S' | 'C', type2: 'D' | 'I' | 'S' | 'C'): number {
+  const compatibilityMatrix: Record<string, number> = {
+    'DD': 50,  // Same type - moderate (lack diversity)
+    'II': 50,
+    'SS': 50,
+    'CC': 50,
+    'DI': 70,  // Both fast, extraverted - good synergy
+    'ID': 70,
+    'IS': 70,  // People-oriented - good synergy
+    'SI': 70,
+    'SC': 70,  // Both cautious, introverted - good synergy
+    'CS': 70,
+    'DC': 85,  // Task-oriented complementary - excellent
+    'CD': 85,
+    'DS': 40,  // Speed vs patience - challenging
+    'SD': 40,
+    'IC': 40,  // Emotion vs logic - challenging
+    'CI': 40,
+  };
+
+  const key = type1 + type2;
+  return compatibilityMatrix[key] ?? 50;
+}
+
+/**
+ * Calculate the average difference between two DISC score profiles (0-100)
+ * Difference = how different their DISC profiles are on average
+ */
+function calculateDifferenceScore(scores1: DISCScores, scores2: DISCScores): number {
+  const diffs = [
+    Math.abs(scores1.dominance - scores2.dominance),
+    Math.abs(scores1.influence - scores2.influence),
+    Math.abs(scores1.steadiness - scores2.steadiness),
+    Math.abs(scores1.conscientiousness - scores2.conscientiousness),
+  ];
+
+  return diffs.reduce((a, b) => a + b, 0) / diffs.length;
+}
+
+/**
+ * Calculate difference adjustment factor (0.7-1.0)
+ *
+ * Adjusts the base type compatibility based on how different the actual scores are:
+ * - Very similar scores (< 10 diff): 0.7 penalty (lack of diversity)
+ * - Moderate difference (10-30 diff): 0.85-1.0 (optimal)
+ * - Large difference (> 30 diff): 0.7-0.85 (communication challenges)
+ */
+function calculateDifferenceAdjustment(diffScore: number): number {
+  if (diffScore < 10) {
+    // Too similar - reduce for lack of diversity
+    return 0.7 + (diffScore / 10) * 0.15; // 0.7-0.85
+  } else if (diffScore <= 30) {
+    // Optimal range - full benefit
+    return 0.85 + ((diffScore - 10) / 20) * 0.15; // 0.85-1.0
+  } else {
+    // Too different - reduce for communication challenges
+    return Math.max(0.7, 1.0 - ((diffScore - 30) / 40) * 0.3); // 0.7-1.0
+  }
+}
+
+/**
  * Calculate similarity between two score sets (0-100)
- * Similarity = how close their DISC profiles are
+ * Used for conflict analysis in same-type pairings
  */
 function calculateSimilarity(scores1: DISCScores, scores2: DISCScores): number {
   const diffs = [
@@ -28,71 +113,6 @@ function calculateSimilarity(scores1: DISCScores, scores2: DISCScores): number {
 
   const avgDiff = diffs.reduce((a, b) => a + b, 0) / diffs.length;
   return 100 - avgDiff; // Higher similarity = lower difference
-}
-
-/**
- * Calculate complementarity between two profiles based on DISC scores (0-100)
- * Complementarity = how well they balance each other
- *
- * DISC Complementary Theory:
- * - D + C: Task-oriented, D provides drive, C provides structure
- * - D + I: D provides direction, I provides persuasion
- * - I + S: People-oriented, I brings energy, S brings stability
- * - S + C: Process-oriented, S provides support, C provides accuracy
- * - D + S: Can be challenging (speed vs patience)
- * - I + C: Can be challenging (emotion vs logic)
- *
- * Optimal balance: moderate difference (20-40 points per dimension)
- * Too similar: lack of complementary strengths
- * Too different: potential conflicts
- */
-function calculateComplementarity(profile1: DISCProfile, profile2: DISCProfile): number {
-  const s1 = profile1.scores;
-  const s2 = profile2.scores;
-
-  // Calculate complementarity for each dimension
-  const calcDimComplementarity = (val1: number, val2: number): number => {
-    const diff = Math.abs(val1 - val2);
-
-    // Optimal difference: 20-40 (moderate complementarity)
-    // Too similar (< 15): less complementary
-    // Too different (> 50): potential conflicts
-    if (diff <= 15) {
-      // Very similar - low complementarity
-      return 40 + (diff / 15) * 20; // 40-60
-    } else if (diff <= 40) {
-      // Optimal range - high complementarity
-      return 60 + ((diff - 15) / 25) * 30; // 60-90
-    } else {
-      // Too different - diminishing returns due to potential conflicts
-      return Math.max(30, 90 - ((diff - 40) / 20) * 30); // 30-90
-    }
-  };
-
-  // Task-oriented dimensions (D and C work well together)
-  const taskComplementarity =
-    (calcDimComplementarity(s1.dominance, s2.conscientiousness) +
-     calcDimComplementarity(s1.conscientiousness, s2.dominance)) / 2;
-
-  // People-oriented dimensions (I and S work well together)
-  const peopleComplementarity =
-    (calcDimComplementarity(s1.influence, s2.steadiness) +
-     calcDimComplementarity(s1.steadiness, s2.influence)) / 2;
-
-  // Cross dimensions (D+I, D+S, I+C, S+C)
-  const crossComplementarity =
-    (calcDimComplementarity(s1.dominance, s2.influence) +
-     calcDimComplementarity(s1.dominance, s2.steadiness) +
-     calcDimComplementarity(s1.influence, s2.conscientiousness) +
-     calcDimComplementarity(s1.steadiness, s2.conscientiousness)) / 4;
-
-  // Weight the scores
-  // Task and people combinations get higher weight
-  return Math.round(
-    taskComplementarity * 0.35 +
-    peopleComplementarity * 0.35 +
-    crossComplementarity * 0.30
-  );
 }
 
 /**
@@ -686,28 +706,79 @@ function getBestWorkingStyles(profile1: DISCProfile, profile2: DISCProfile): str
 }
 
 /**
+ * Determine compatibility level based on synergy score
+ *
+ * Based on standard DISC theory compatibility levels:
+ * - 75+ : 훌륭한 조합 (excellent synergy)
+ * - 60-74: 좋은 조합 (good synergy)
+ * - 45-59: 보통의 조합 (moderate synergy)
+ * - < 45 : 도전적인 조합 (challenging)
+ */
+function determineCompatibilityLevel(
+  synergyScore: number
+): SynergyResult['compatibilityLevel'] {
+  if (synergyScore >= 75) {
+    return '훌륭한 조합';
+  } else if (synergyScore >= 60) {
+    return '좋은 조합';
+  } else if (synergyScore >= 45) {
+    return '보통의 조합';
+  } else {
+    return '도전적인 조합';
+  }
+}
+
+/**
  * Calculate synergy score between two DISC profiles
  *
- * The synergy score balances two factors:
- * 1. Complementarity (55%): How well their strengths balance each other
- * 2. Similarity (45%): How well they understand each other
+ * NEW FORMULA (based on standard DISC theory):
+ * synergy = type_compatibility * difference_adjustment * balance_bonus
  *
- * Too much similarity = lack of diverse perspectives
- * Too much difference = communication challenges
+ * Where:
+ * - type_compatibility: Base compatibility between DISC types (D+C=85, I+S=70, D+S=40, etc.)
+ * - difference_adjustment: Adjustment based on score deviation (0.7-1.0)
+ * - balance_bonus: Small bonus for well-balanced profiles (0-10)
+ *
+ * This approach aligns with standard DISC theory:
+ * - D + C = High synergy (task-oriented complementary)
+ * - I + S = High synergy (people-oriented complementary)
+ * - D + S = Low synergy (speed vs patience - opposing)
+ * - I + C = Low synergy (emotion vs logic - opposing)
+ *
+ * Score differences adjust the base type compatibility:
+ * - Very similar scores (< 10): Reduces synergy (lack of diversity)
+ * - Moderate difference (10-30): Optimal
+ * - Large difference (> 30): Reduces synergy (communication challenges)
  */
 export function calculateSynergy(profile1: DISCProfile, profile2: DISCProfile): SynergyResult {
-  const complementarity = calculateComplementarity(profile1, profile2);
-  const similarity = calculateSimilarity(profile1.scores, profile2.scores);
+  const type1 = getPrimaryType(profile1.scores);
+  const type2 = getPrimaryType(profile2.scores);
 
-  // Weighted score: complementarity and similarity are both important
-  const synergyScore = Math.round(complementarity * 0.55 + similarity * 0.45);
+  // Base compatibility from DISC type theory
+  const typeCompatibility = calculateTypeCompatibility(type1, type2);
 
-  // Determine compatibility level
-  let compatibilityLevel: SynergyResult['compatibilityLevel'];
-  if (synergyScore >= 80) compatibilityLevel = '훌륭한 조합';
-  else if (synergyScore >= 65) compatibilityLevel = '좋은 조합';
-  else if (synergyScore >= 50) compatibilityLevel = '보통의 조합';
-  else compatibilityLevel = '도전적인 조합';
+  // Adjustment based on actual score differences
+  const diffScore = calculateDifferenceScore(profile1.scores, profile2.scores);
+  const diffAdjustment = calculateDifferenceAdjustment(diffScore);
+
+  // Calculate profile balance (how well-rounded each profile is)
+  // Well-balanced profiles (no extreme scores) get a small bonus
+  const calcBalance = (scores: DISCScores): number => {
+    const values = [scores.dominance, scores.influence, scores.steadiness, scores.conscientiousness];
+    const max = Math.max(...values);
+    const min = Math.min(...values);
+    const range = max - min;
+    // Lower range = more balanced = higher bonus
+    return Math.max(0, 1 - range / 100);
+  };
+
+  const balanceBonus = (calcBalance(profile1.scores) + calcBalance(profile2.scores)) / 2 * 10;
+
+  // Final synergy calculation
+  const rawSynergy = typeCompatibility * diffAdjustment + balanceBonus;
+  const synergyScore = Math.max(0, Math.min(100, Math.round(rawSynergy)));
+
+  const compatibilityLevel = determineCompatibilityLevel(synergyScore);
 
   return {
     synergyScore,
