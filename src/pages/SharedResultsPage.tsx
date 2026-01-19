@@ -37,8 +37,10 @@ export default function SharedResultsPage() {
   }, [data, loadFromShareData]);
 
   const handleCollaborate = () => {
-    // Navigate with the share data - it will be loaded as user's own results
-    navigate(`/collaborate?data=${data}`);
+    // Navigate with the share data as partner data
+    const baseUrl = (window.location.origin + import.meta.env.BASE_URL).replace(/\/$/, '');
+    const partnerUrl = `${baseUrl}/shared/${data}`;
+    navigate(`/collaborate?partnerData=${encodeURIComponent(partnerUrl)}`);
   };
 
   if (loading) {

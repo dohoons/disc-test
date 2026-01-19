@@ -23,8 +23,28 @@ export default function CollaborationPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Check for shared data in URL - this is the user's own results
+    // Check for partner data in URL - this comes from SharedResultsPage
+    const partnerDataParam = searchParams.get('partnerData');
     const sharedData = searchParams.get('data');
+
+    if (partnerDataParam) {
+      setPartnerData(decodeURIComponent(partnerDataParam));
+      // Extract and load the partner data automatically
+      const urlMatch = partnerDataParam.match(/\/shared\/([^/?]+)/);
+      const dataToLoad = urlMatch ? urlMatch[1] : partnerDataParam.trim();
+      const profile = loadFromShareData(dataToLoad);
+      if (profile) {
+        setPartnerResults(profile);
+        // Save to localStorage for persistence
+        try {
+          localStorage.setItem('disc_partner_url', partnerDataParam);
+        } catch (error) {
+          console.error('Failed to save partner URL to localStorage:', error);
+        }
+      }
+    }
+
+    // Check for shared data in URL - this is the user's own results
     if (sharedData) {
       const profile = loadFromShareData(sharedData);
       if (profile) {
@@ -47,16 +67,18 @@ export default function CollaborationPage() {
       }
     }
 
-    // Load partner URL from localStorage if it exists
-    try {
-      const savedPartnerUrl = localStorage.getItem('disc_partner_url');
-      if (savedPartnerUrl) {
-        setPartnerData(savedPartnerUrl);
+    // Load partner URL from localStorage only if not already set from URL parameter
+    if (!partnerDataParam) {
+      try {
+        const savedPartnerUrl = localStorage.getItem('disc_partner_url');
+        if (savedPartnerUrl) {
+          setPartnerData(savedPartnerUrl);
+        }
+      } catch (error) {
+        console.error('Failed to load partner URL from localStorage:', error);
       }
-    } catch (error) {
-      console.error('Failed to load partner URL from localStorage:', error);
     }
-  }, [searchParams, loadFromShareData, setUserResults, userResults, getShareableData]);
+  }, [searchParams, loadFromShareData, setUserResults, setPartnerResults, userResults, getShareableData]);
 
   const handleLoadUser = () => {
     if (!userData.trim()) {
