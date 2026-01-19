@@ -10,7 +10,7 @@ interface QuizNavigationProps {
   onComplete?: () => void;
 }
 
-export function QuizNavigation({ onComplete }: QuizNavigationProps) {
+export function QuizNavigation({ onComplete: _onComplete }: QuizNavigationProps) {
   const {
     currentQuestion,
     totalQuestions,
