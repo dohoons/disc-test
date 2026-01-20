@@ -71,7 +71,7 @@ export function Footer() {
         <div className="mt-8 pt-8 border-t border-gray-800">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p className="text-sm text-gray-500">
-              © {currentYear} DISC 성격 유형 검사. 모든 권리 보유.
+              © {currentYear} DISC. All rights reserved.
             </p>
             <div className="flex items-center space-x-6">
               <a
