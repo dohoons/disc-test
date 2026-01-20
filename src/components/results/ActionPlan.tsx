@@ -3,6 +3,7 @@
  * Displays actionable tips based on DISC profile
  */
 
+import { Link } from 'react-router-dom';
 import { getActionPlan } from '../../lib/disc/profiles';
 import { DISCType } from '../../lib/disc/scoring';
 import { Card, CardHeader, CardBody } from '../common';
@@ -49,9 +50,9 @@ export function ActionPlan({ primaryType, secondaryType }: ActionPlanProps) {
           </h4>
           <p className="text-sm text-gray-700">
             다른 DISC 유형과의 협업 방법을 알아보려면{' '}
-            <a href="/collaborate" className="text-blue-600 hover:underline font-medium">
+            <Link to="/collaborate" className="text-blue-600 hover:underline font-medium">
               협업 분석
-            </a>
+            </Link>
             페이지를 확인하세요.
           </p>
         </div>
