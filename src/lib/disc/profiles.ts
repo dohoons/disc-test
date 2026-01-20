@@ -51,7 +51,7 @@ export const discProfiles: Record<string, DISCProfileDescription> = {
       '실패',
       '약해 보이는 것',
     ],
-    idealWorkEnvironment: '빠르게 진행되며 리더십과 측정 가능한 결과를 위한 기회가 있는 환경.',
+    idealWorkEnvironment: '빠르게 진행되며 리더십을 발휘하고 구체적 성과를 낼 기회가 있는 환경.',
     communicationStyle: '직접적이고 간결하며 핵심을 찔러요. 효율성과 솔직함을 높이 평가합니다.',
     decisionMaking: '빠르고 단호한 결정. 직관을 신뢰하고 숙고보다 행동을 선호합니다.',
   },

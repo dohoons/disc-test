@@ -169,7 +169,7 @@ export function getCommunicationTips(
       ],
     },
     'D-to-I': {
-      approach: '직접적이지만 매력적으로. 사회적 상호작용을 허용.',
+      approach: '직설적이면서도 매력적으로. 사회적 상호작용을 허용.',
       keyStrategies: [
         '직접성과 열정의 균형',
         '아이디어 인정',
@@ -191,7 +191,7 @@ export function getCommunicationTips(
       ],
     },
     'D-to-S': {
-      approach: '직접적이지만 존중중. 처리할 시간 허용.',
+      approach: '직설적이지만 존중하는 방식으로. 처리할 시간 허용.',
       keyStrategies: [
         '강도를 약간 낮추기',
         '명확한 기대 제공',
@@ -213,7 +213,7 @@ export function getCommunicationTips(
       ],
     },
     'D-to-C': {
-      approach: '직접적이지만 지원 정보 제공.',
+      approach: '직설적이면서도 필요한 정보를 제공하는 방식으로.',
       keyStrategies: [
         '효율적으로 핵심에 도달',
         '핵심 데이터와 사실 포함',
@@ -301,7 +301,7 @@ export function getCommunicationTips(
       ],
     },
     'I-to-C': {
-      approach: '친근하지만 정리되어 있음. 구조 제공.',
+      approach: '친근하면서도 체계적인 방식으로. 구조 제공.',
       keyStrategies: [
         '열정과 사실의 균형',
         '데이터로 준비',

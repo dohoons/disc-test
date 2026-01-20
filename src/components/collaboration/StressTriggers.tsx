@@ -24,7 +24,7 @@ export function StressTriggers({ userResults, partnerResults }: StressTriggersPr
 
     // D type stress triggers
     if (d > 50) {
-      triggers.push('미시微观관리 (micromanagement)');
+      triggers.push('사소한 것까지 간섭받기');
       triggers.push('결과 없는 긴 회의');
       triggers.push('자율성 침해');
       triggers.push('경쟁에서 패배');

@@ -226,10 +226,10 @@ export const discQuestions: Question[] = [
   {
     id: 24,
     statements: [
-      { id: '24a', text: '리더가 되어 방향을 제시한다', type: 'D' },
-      { id: '24b', text: '좋아해주길 원한다', type: 'I' },
-      { id: '24c', text: '도움이 되길 원한다', type: 'S' },
-      { id: '24d', text: '옳길 원한다', type: 'C' },
+      { id: '24a', text: '리더가 되어 방향을 정한다', type: 'D' },
+      { id: '24b', text: '인정받고 싶어한다', type: 'I' },
+      { id: '24c', text: '다른 사람을 돕고 싶다', type: 'S' },
+      { id: '24d', text: '옳은 것을 추구한다', type: 'C' },
     ],
   },
 ];
